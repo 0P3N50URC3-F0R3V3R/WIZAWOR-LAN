@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Wizard Of Wor. Commodore 64 game remake.">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="index,follow">
+    <style>
+        body,
+        canvas,
+        div,
+        html,
+        img,
+        span {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            font-size: 100%;
+            font: inherit;
+            vertical-align: baseline
+        }
+        
+        @font-face {
+            font-family: 'WizardOfWor';
+            src: url('fonts/v2.0/wizardofwor-webfont.woff') format('woff');
+            font-weight: normal;
+            font-style: normal
+        }
+        
+        @font-face {
+            font-family: 'C64ProRegular';
+            src: url('fonts/v2.0/c64_pro_v1.0-style-webfont-webfont.woff') format('woff');
+            font-weight: normal;
+            font-style: normal
+        }
+        
+        html {
+            height: 100%;
+            overflow: hidden;
+            background: #000
+        }
+        
+        body {
+            position: relative;
+            height: 100%;
+            font-family: 'C64ProRegular';
+            font-size: 8px;
+            line-height: 1;
+            color: #fff;
+            background: #000;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none
+        }
+        
+        #border {
+            position: absolute;
+            z-index: 80;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%
+        }
+        
+        a {
+            text-decoration: none
+        }
+        
+        *:focus {
+            outline: none
+        }
+        
+        .hide {
+            display: none !important
+        }
+        
+        #body {
+            position: relative;
+            z-index: 50;
+            top: 0;
+            left: 0;
+            margin-left: 0;
+            width: auto;
+            height: 100%;
+            transition: margin-left 0.2s linear 0s
+        }
+        
+        #body.menu {
+            margin-left: 300px
+        }
+        
+        #screen {
+            position: absolute;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 960px;
+            height: 600px;
+            transform-origin: 0 0;
+            -webkit-transform-origin: 0 0;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -o-crisp-edges;
+            -ms-interpolation-mode: nearest-neighbor
+        }
+        
+        #visualFilterLayer {
+            position: absolute;
+            z-index: 120;
+            pointer-events: none;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -o-crisp-edges;
+            -ms-interpolation-mode: nearest-neighbor
+        }
+        
+        #menuOverlay {
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%
+        }
+        
+        #menuToggler {
+            box-sizing: border-box;
+            position: fixed;
+            z-index: 1400;
+            top: 5px;
+            left: 5px;
+            width: 105px;
+            padding-left: 40px;
+            padding-top: 12px;
+            height: 38px;
+            cursor: pointer;
+            background-color: #a00;
+            background-image: url("images/v4.0/menu-toggler.png");
+            background-repeat: no-repeat;
+            background-position: left center;
+            font-size: 16px;
+            text-transform: uppercase;
+            color: white;
+            overflow: hidden;
+            transition: width 0.2s linear 0s
+        }
+        
+        #menuToggler.small {
+            width: 38px;
+            padding-left: 0;
+            background-color: #444
+        }
+        
+        #menuToggler.small span {
+            display: none
+        }
+        
+        #menuToggler:hover {
+            background-color: #b11
+        }
+        
+        #menuToggler.small:hover {
+            background-color: #555
+        }
+        
+        #menu {
+            position: fixed;
+            z-index: 1500;
+            top: 0;
+            left: -500px;
+            width: 320px;
+            max-width: 75%;
+            height: 100%;
+            background: #555;
+            overflow-x: hidden;
+            overflow-y: auto;
+            transition: left 0.2s linear 0s
+        }
+        
+        #menu.opened {
+            left: 0
+        }
+        
+        #menu > .l1 {
+            display: block;
+            box-sizing: border-box;
+            padding: 15px 0 0;
+            background: #15c;
+            color: #fff;
+            text-align: center;
+            text-transform: uppercase;
+            font-size: 16px;
+            border-bottom: 1px solid #137;
+            cursor: pointer
+        }
+        
+        #menu > .l1.startButton {
+            background: #a00
+        }
+        
+        #menu > .l1:hover {
+            background: #27e
+        }
+        
+        #menu > .l1.startButton:hover {
+            background: #b11
+        }
+        
+        #menu > .l1.nosubmenu {
+            padding-bottom: 10px
+        }
+        
+        #menu > .l1 .items {
+            margin-top: 10px;
+            border-top: 1px solid #137;
+            transition: height 0.2s linear 0s;
+            overflow: hidden;
+            background: #249
+        }
+        
+        #menu > .l1 .items.closed {
+            height: 0 !important;
+            border-top: none
+        }
+        
+        #menu > .l1 .items > div {
+            border-bottom: 1px solid #137;
+            padding: 5px;
+            font-size: 16px;
+            color: #fff
+        }
+        
+        #menu > .l1 .items > div:hover {
+            background: #46a
+        }
+        
+        #menu > .l1 .items > div.active {
+            background: #ff0;
+            color: #137
+        }
+        
+        #buymeacoffee {
+            position: fixed;
+            top: 2px;
+            right: 2px;
+            z-index: 2500;
+            display: block;
+            width: 42px;
+            height: 48px;
+            background: url("images/v4.0/buy-me-a-coffee-button-dark.png") no-repeat
+        }
+    </style>
+    <link rel="shortcut icon" href="favicon.ico">
+    <title>Wizard Of Wor</title>
+    <meta property="og:title" content="Wizard Of Wor">
+    <meta property="og:type" content="game">
+    <meta property="og:site_name" content="Wizard Of Wor">
+    <meta property="og:description" content="Wizard Of Wor is a legendary arcade game from 1983. Now you can play with it in your browser. Have fun!">
+</head>
+
+<body data-sid="">
+    <div id="body">
+        <div id="border"><canvas id="screen" width="960" height="600" class="hide" moz-opaque></canvas><canvas id="visualFilterLayer" width="960" height="600"></canvas></div>
+        <div id="menuOverlay" class="hide"></div>
+        <div id="menuToggler" class="hide"><span>Menu</span></div>
+        <div id="menu">
+            <div class="l1 back nosubmenu">&lt; Close</div>
+            <div id="menuLobbyBtn" class="l1 nosubmenu" style="cursor:pointer">&#9654; Multiplayer Lobby</div>
+            <div id="toggleFullscreen" class="l1 nosubmenu">Fullscreen</div>
+            <div class="l1">Visual filter
+                <div id="visualFilterSelect" class="items closed">
+                    <div data-value="none">none</div>
+                    <div data-value="scanlines">Scan lines</div>
+                    <div data-value="bwTv">black and white TV</div>
+                    <div data-value="colorTv">color TV</div>
+                    <div data-value="greenC64monitor">green C64 monitor</div>
+                </div>
+            </div>
+            <div class="l1">Sounds
+                <div id="soundSelect" class="items closed">
+                    <div data-value="on">on</div>
+                    <div data-value="off">off</div>
+                </div>
+            </div>
+            <div id="ctrlYellow" class="l1">Yellow worrior control
+                <div id="yellowControlSelect" class="items closed">
+                    <div data-value="keyboardArrows">arrows + enter</div>
+                    <div data-value="keyboardWasd">wasd + left shift</div>
+                    <div data-value="gamepad">gamepad</div>
+                </div>
+            </div>
+            <div id="ctrlBlue" class="l1">Blue worrior control
+                <div id="blueControlSelect" class="items closed">
+                    <div data-value="keyboardArrows">arrows + enter</div>
+                    <div data-value="keyboardWasd">wasd + left shift</div>
+                    <div data-value="gamepad">gamepad</div>
+                </div>
+    </div><img src="images/v4.0/noise.png" id="crtNoise" class="hide"><span style="font-family:WizardOfWor"></span>
+    <script src="js/v5.0/multiplayer.js?v=1"></script>
+    <script class="j" src="js/v5.0/w.js?v=1"></script>
+    <script>document.getElementById('menuLobbyBtn').addEventListener('click', function(){ window.location.href='lobby.html'; });</script>
+</body>
+
+</html>

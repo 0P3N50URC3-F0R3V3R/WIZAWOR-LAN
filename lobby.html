@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wizard Of Wor – Multiplayer Lobby</title>
+    <style>
+        @font-face {
+            font-family: 'WizardOfWor';
+            src: url('fonts/v2.0/wizardofwor-webfont.woff') format('woff');
+        }
+        @font-face {
+            font-family: 'C64ProRegular';
+            src: url('fonts/v2.0/c64_pro_v1.0-style-webfont-webfont.woff') format('woff');
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%;
+            background: #000;
+            color: #fff;
+            font-family: 'C64ProRegular', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .screen {
+            width: 100%;
+            max-width: 520px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-family: 'WizardOfWor', serif;
+            font-size: clamp(22px, 5vw, 32px);
+            color: #DFF60A;
+            text-align: center;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 11px;
+            color: #30E6C6;
+            letter-spacing: 5px;
+            margin-bottom: 32px;
+        }
+
+        /* Tab buttons */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #30E6C6;
+            margin-bottom: 0;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: #0d0d0d;
+            border: none;
+            border-bottom: none;
+            color: #70746F;
+            font-family: inherit;
+            font-size: 12px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.15s, color 0.15s;
+        }
+        .tab-btn:hover { background: #1a1a1a; color: #A4A7A2; }
+        .tab-btn.active { background: #000; color: #DFF60A; border-top: 2px solid #30E6C6; border-left: 2px solid #30E6C6; border-right: 2px solid #30E6C6; margin-bottom: -2px; }
+
+        /* Panels */
+        .panel {
+            display: none;
+            border: 2px solid #30E6C6;
+            border-top: none;
+            background: #050505;
+            padding: 28px 24px;
+        }
+        .panel.active { display: block; }
+
+        /* Host panel */
+        .host-desc {
+            font-size: 11px;
+            color: #A4A7A2;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .role-badge {
+            display: inline-block;
+            font-size: 12px;
+            padding: 3px 10px;
+            margin-bottom: 20px;
+        }
+        .role-yellow { color: #DFF60A; border: 1px solid #DFF60A; }
+        .role-blue   { color: #5F53FE; border: 1px solid #5F53FE; }
+
+        /* Join panel */
+        .join-label {
+            font-size: 11px;
+            color: #A4A7A2;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .join-input {
+            width: 100%;
+            background: #0d0d0d;
+            border: 1px solid #444;
+            color: #DFF60A;
+            font-family: inherit;
+            font-size: 20px;
+            letter-spacing: 6px;
+            padding: 12px 14px;
+            text-transform: uppercase;
+            outline: none;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .join-input:focus { border-color: #30E6C6; }
+        .join-input::placeholder { color: #333; letter-spacing: 4px; }
+
+        /* Action button */
+        .action-btn {
+            width: 100%;
+            background: #BE1A24;
+            color: #fff;
+            border: none;
+            padding: 14px;
+            font-family: inherit;
+            font-size: 14px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .action-btn:hover { background: #FE4A57; }
+        .action-btn:disabled { background: #333; color: #666; cursor: default; }
+
+        /* Error */
+        .error-msg {
+            font-size: 11px;
+            color: #FE4A57;
+            margin-top: 12px;
+            min-height: 16px;
+            text-align: center;
+        }
+
+        /* Controls reference */
+        .controls-box {
+            margin-top: 28px;
+            border: 1px solid #222;
+            padding: 14px;
+            font-size: 10px;
+            color: #555;
+            line-height: 1.8;
+        }
+        .controls-box strong { color: #70746F; }
+        .ctrl-yellow { color: #DFF60A; }
+        .ctrl-blue   { color: #5F53FE; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 10px;
+            color: #333;
+        }
+        .footer a { color: #444; text-decoration: none; }
+        .footer a:hover { color: #70746F; }
+    </style>
+</head>
+<body>
+
+<div class="screen">
+    <h1>WIZARD OF WOR</h1>
+    <div class="subtitle">ONLINE MULTIPLAYER</div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('host')">HOST GAME</button>
+        <button class="tab-btn"        onclick="showTab('join')">JOIN GAME</button>
+    </div>
+
+    <!-- HOST PANEL -->
+    <div id="panelHost" class="panel active">
+        <div class="host-desc">
+            Create a lobby and share the link with your opponent. You play as the Yellow Worrior.
+        </div>
+        <div>
+            <span class="role-badge role-yellow">YELLOW WORRIOR — HOST</span>
+        </div>
+        <button class="action-btn" onclick="hostGame()">CREATE LOBBY</button>
+        <div class="error-msg" id="hostErr"></div>
+
+        <div class="controls-box">
+            <strong>Controls:</strong><br>
+            <span class="ctrl-yellow">Yellow</span> — Arrow keys + Enter to fire<br>
+            <span class="ctrl-blue">Blue</span>&nbsp;&nbsp;&nbsp; — Arrow keys + Enter to fire
+        </div>
+    </div>
+
+    <!-- JOIN PANEL -->
+    <div id="panelJoin" class="panel">
+        <div class="host-desc">
+            Enter the 6-character room code your opponent shared with you. You play as the Blue Worrior.
+        </div>
+        <div>
+            <span class="role-badge role-blue">BLUE WORRIOR — CLIENT</span>
+        </div>
+        <label class="join-label" for="roomInput">ROOM CODE</label>
+        <input
+            id="roomInput"
+            class="join-input"
+            type="text"
+            maxlength="6"
+            placeholder="XXXXXX"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+            oninput="this.value = this.value.toUpperCase().replace(/[^A-F0-9]/g,'')"
+            onkeydown="if(event.key==='Enter') joinGame()"
+        />
+        <button class="action-btn" id="joinBtn" onclick="joinGame()">JOIN GAME</button>
+        <div class="error-msg" id="joinErr"></div>
+
+        <div class="controls-box">
+            <strong>Controls:</strong><br>
+            <span class="ctrl-yellow">Yellow</span> — Arrow keys + Enter to fire<br>
+            <span class="ctrl-blue">Blue</span>&nbsp;&nbsp;&nbsp; — Arrow keys + Enter to fire
+        </div>
+    </div>
+
+    <div class="footer">
+        <a href="index.html">← Single Player</a>
+        &nbsp;·&nbsp;
+        <span>Wizard Of Wor Remake</span>
+    </div>
+</div>
+
+<script>
+    function showTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(function(b, i) {
+            b.classList.toggle('active', (i === 0 && tab === 'host') || (i === 1 && tab === 'join'));
+        });
+        document.getElementById('panelHost').classList.toggle('active', tab === 'host');
+        document.getElementById('panelJoin').classList.toggle('active', tab === 'join');
+        if (tab === 'join') document.getElementById('roomInput').focus();
+    }
+
+    function randomRoomId() {
+        var hex = '0123456789ABCDEF';
+        var id = '';
+        for (var i = 0; i < 6; i++) id += hex[Math.floor(Math.random() * 16)];
+        return id;
+    }
+
+    function hostGame() {
+        var roomId = randomRoomId();
+        var url = 'index.html?room=' + roomId + '&role=host';
+        window.location.href = url;
+    }
+
+    function joinGame() {
+        var code = document.getElementById('roomInput').value.trim().toUpperCase();
+        var errEl = document.getElementById('joinErr');
+        if (code.length !== 6) {
+            errEl.textContent = 'Room code must be 6 characters';
+            return;
+        }
+        errEl.textContent = '';
+        document.getElementById('joinBtn').disabled = true;
+        document.getElementById('joinBtn').textContent = 'CONNECTING...';
+        var url = 'index.html?room=' + code + '&role=client';
+        window.location.href = url;
+    }
+</script>
+
+</body>
+</html>
