@@ -44,3 +44,7 @@ See [`docs/`](docs/) for full technical documentation:
 - [Networking Protocol](docs/networking.md)
 - [Game Mechanics](docs/game-mechanics.md)
 - [File Structure](docs/file-structure.md)
+
+## Repository
+
+`https://nexnet.hu:5678/peter/Wizawor-network`
