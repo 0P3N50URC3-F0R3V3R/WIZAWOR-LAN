@@ -1058,22 +1058,29 @@
         }
         ;
         this.scanDoubleScore = function() {
-            this.frameCounters.doubleScore++;
-            if (1 == this.frameCounters.doubleScore) {
-                this.animateSkip.doubleScore = !1;
-                if (!this.doubleScoreNext && 3 != this.level && 12 != this.level) {
-                    this.frameCounters.doubleScore = 0;
-                    this.nextDungeon();
-                    return
-                }
-                this.doubleScoreNext && r("Doublescore");
-                if (3 == this.level || 12 == this.level)
-                    "out" != this.players[0].status && e.players[0].lives++,
-                    "out" != this.players[1].status && e.players[1].lives++
-            }
-            this.frameCounters.doubleScore >= u(4.9) && (this.frameCounters.doubleScore = 0,
-            this.nextDungeon())
-        }
+		this.frameCounters.doubleScore++;
+		if (1 == this.frameCounters.doubleScore) {
+			this.animateSkip.doubleScore = !1;
+        
+			// Csak akkor ellenőrizzük a 3-as osztót, ha a szint nagyobb mint 0
+			// Így a 0. szinten (induláskor) úgy viselkedik, mint egy sima pálya
+			if (!this.doubleScoreNext && (this.level === 0 || this.level % 3 !== 0)) {
+				this.frameCounters.doubleScore = 0;
+				this.nextDungeon();
+				return;
+			}
+			
+			this.doubleScoreNext && r("Doublescore");
+			
+			// Csak a 0-nál nagyobb, 3-mal osztható szinteken ad életet (3, 6, 9...)
+			if (this.level > 0 && this.level % 3 === 0) {
+				"out" != this.players[0].status && e.players[0].lives++;
+				"out" != this.players[1].status && e.players[1].lives++;
+			}
+		}
+		this.frameCounters.doubleScore >= u(4.9) && (this.frameCounters.doubleScore = 0,
+		this.nextDungeon());
+	}
         ;
         this.speedUp = function() {
             if (!(this.afterLastThorwor || 16 <= this.speed)) {

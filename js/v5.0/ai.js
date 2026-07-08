@@ -953,23 +953,27 @@
     }
 
     // ── _wowReady hook ────────────────────────────────────────────────────────
+    var _origWowReady = window._wowReady;
     window._wowReady = function (b, e) {
+        // Online multiplayer is authoritative — don't clobber its hook or run AI.
+        if (window._wowMP) {
+            if (_origWowReady) _origWowReady(b, e);
+            return;
+        }
+
         _b = b;
         _e = e;
         b.options.blueControl = 'keyboardWasd';
 
-        // Only intercept scanTitle when not in online multiplayer
-        if (!window._wowMP) {
-            var _origScanTitle = e.scanTitle.bind(e);
-            e.scanTitle = function () {
-                if (b.pressedKeys[49] === true) {
-                    b.pressedKeys[49] = false;
-                    showSubmenu();
-                    return;
-                }
-                _origScanTitle();
-            };
-        }
+        var _origScanTitle = e.scanTitle.bind(e);
+        e.scanTitle = function () {
+            if (b.pressedKeys[49] === true) {
+                b.pressedKeys[49] = false;
+                showSubmenu();
+                return;
+            }
+            _origScanTitle();
+        };
 
         if (_pendingAIStart) {
             _pendingAIStart = false;
